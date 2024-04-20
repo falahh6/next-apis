@@ -38,8 +38,8 @@ const Page = () => {
         }
 
         const decodedText = textDecoder.decode(value);
-        setOutput((prev) => prev + removePrefixAndSpaceAndQuotes(decodedText));
-        console.log(removePrefixAndSpaceAndQuotes(decodedText));
+        setOutput((prev) => prev + decodedText);
+        console.log(decodedText);
       }
     });
   };
