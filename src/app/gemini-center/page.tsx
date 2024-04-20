@@ -1,8 +1,17 @@
 "use client";
 
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { FormEvent, useState } from "react";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+
+function removePrefixAndSpaceAndQuotes(inputString: string) {
+  if (inputString.startsWith(`0:"`)) {
+    return inputString.slice(3).trim().replace(/"$/, "");
+  } else {
+    return inputString;
+  }
+}
 
 const Page = () => {
   const [input, setInput] = useState("");
@@ -10,24 +19,27 @@ const Page = () => {
 
   const myGeminiApi = (e: FormEvent) => {
     e.preventDefault();
-    fetch("https://gemini-stream.vercel.app/api/gemini-stream", {
+    fetch("/api/gemini-stream", {
       method: "POST",
       body: JSON.stringify({
         prompt: input,
       }),
     }).then(async (response) => {
+      console.log(response);
       //@ts-ignore
       const reader = response.body.getReader();
       const textDecoder = new TextDecoder("utf-8");
 
       while (true) {
         const { done, value } = await reader.read();
+
         if (done) {
           return;
         }
+
         const decodedText = textDecoder.decode(value);
-        setOutput((prev) => prev + decodedText);
-        console.log(decodedText);
+        setOutput((prev) => prev + removePrefixAndSpaceAndQuotes(decodedText));
+        console.log(removePrefixAndSpaceAndQuotes(decodedText));
       }
     });
   };
