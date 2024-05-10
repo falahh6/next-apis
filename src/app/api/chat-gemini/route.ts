@@ -9,20 +9,33 @@ export const runtime = "edge";
 
 export async function POST(req: Request) {
   const { prompt, response, previousHistory } = await req.json();
-  
+
   let chatHistory: Content[] = [];
   if (JSON.parse(previousHistory).length > 0) {
-    JSON.parse(previousHistory).forEach((prchat: any) => {
-      chatHistory.push(
-        {
-          role: "user",
-          parts: [{ text: prchat.user }],
-        },
-        {
-          role: "model",
-          parts: [{ text: prchat.model }],
-        }
-      );
+    JSON.parse(previousHistory).forEach((prchat: any, i: number) => {
+      if (i === 0) {
+        chatHistory.push(
+          {
+            role: "user",
+            parts: [{ text: `${prompt} \n Input : ${prchat.user}` }],
+          },
+          {
+            role: "model",
+            parts: [{ text: prchat.model }],
+          }
+        );
+      } else {
+        chatHistory.push(
+          {
+            role: "user",
+            parts: [{ text: prchat.user }],
+          },
+          {
+            role: "model",
+            parts: [{ text: prchat.model }],
+          }
+        );
+      }
     });
   }
 
@@ -45,10 +58,12 @@ export async function POST(req: Request) {
 
   console.log(JSON.parse(previousHistory).length);
   if (JSON.parse(previousHistory).length > 0) {
+    console.log("with histor", chatHistory);
     chat = model.startChat({
       history: chatHistory,
     });
   } else {
+    console.log("without history");
     chat = model.startChat();
   }
 
